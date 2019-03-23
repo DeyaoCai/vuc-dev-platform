@@ -3,7 +3,7 @@
   padding: 0;
   border: 0;
   outline: 0;
-  font-size: .75rem;
+  font-size: 14px;
   box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
@@ -51,15 +51,6 @@ html,body{
 .light{
   color: #999;
 }
-.large{
-  font-size: .75rem;
-}
-.middle{
-  font-size: .65rem;
-}
-.middle{
-  font-size: .6rem;
-}
 *.more{
   position: relative;
   padding-right: .75rem!important;
@@ -68,14 +59,13 @@ html,body{
   position: absolute;
   top: 50%;
   right: 0;
-  font-size: .6rem;
   content: "\E601";
   display: inline-block;
   transform: translateY(-50%) rotate(180deg);
   font-family: "iconfont" !important;
-    font-style: normal;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .iconfont{
   font-size: inherit;
