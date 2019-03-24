@@ -1,11 +1,13 @@
 export default [
-	{path: '/home',name: 'Home',component(resolve) {require(['../views/home/Home.vue'], resolve)}, children: [
-    {path: '/',name: 'ConfigIndex',component(resolve) {require(['../views/home/Index.vue'], resolve)}},
-    {path: 'config-manager',name: 'ConfigManager',component(resolve) {require(['../views/home/ConfigManager.vue'], resolve)}},
-    {path: 'config-detail',name: 'ConfigDetail',component(resolve) {require(['../views/home/Detail.vue'], resolve)}},
-
-  ]},
-  {path: '/platforme',name: 'Platforme',component(resolve) {require(['../views/platforme/Platforme.vue'], resolve)}, children: [
-      {path: 'config-manager',name: 'ConfigManager',component(resolve) {require(['../views/platforme/ConfigManager.vue'], resolve)}},
+  {path: '/',name: 'Index',component(resolve) {require(['../views/home/Home.vue'], resolve)}, children: [
+    {path: '/tape',name: 'Tape',component(resolve) {require(['../views/tape/Tape.vue'], resolve)}, children: [
+      {path: '/',name: 'ConfigIndex',component(resolve) {require(['../views/home/Index.vue'], resolve)}},
+      {path: 'config-manager',name: 'ConfigManager',component(resolve) {require(['../views/tape/ConfigManager.vue'], resolve)}},
+      {path: 'config-detail',name: 'ConfigDetail',component(resolve) {require(['../views/tape/Detail.vue'], resolve)}},
     ]},
+    {path: '/platform',name: 'Platform',component(resolve) {require(['../views/platform/Platform.vue'], resolve)}, children: [
+      {path: '/',name: 'ConfigIndex',component(resolve) {require(['../views/home/Index.vue'], resolve)}},
+      {path: 'test-codes',name: 'TestCodes',component(resolve) {require(['../views/platform/TestCodes.vue'], resolve)}},
+    ]},
+  ]},
 ]
