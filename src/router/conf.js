@@ -7,6 +7,7 @@ export default [
     ]},
     {path: '/platform',name: 'Platform',component(resolve) {require(['../views/platform/Platform.vue'], resolve)}, children: [
       {path: '/',name: 'ConfigIndex',component(resolve) {require(['../views/home/Index.vue'], resolve)}},
+        {path: '/devs',name: 'Devs',component(resolve) {require(['../views/platform/Devs.vue'], resolve)}},
       {path: 'test-codes',name: 'TestCodes',component(resolve) {require(['../views/platform/TestCodes.vue'], resolve)}},
     ]},
   ]},

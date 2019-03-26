@@ -25,7 +25,7 @@
         treeList: [
           {name: "testCodes", list: [], child: [{name: "codesList", path: `TestCodes`,}, {name: "镜像上传"}, {name: "在线构建"}]},
           {name: "工作空间", list: [], child: []},
-          {name: "图表生成", list: [], child: []},
+          {name: "devs", list: [], child: [{name: "devs", path: `Devs`,}]},
           {name: "环境版本", list: [], child: []},
         ]
       }
