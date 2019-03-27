@@ -6,8 +6,54 @@
       <div><span @click="getData">保存</span></div>
     </div>
     <div class="config-manager-list"><div>
+
+      <div class="switch-work-space">
+        <span class="active">vuc</span>
+        <span>vucpc</span>
+        <span>ctools</span>
+        <span>platForm</span>
+        <span>tem</span>
+      </div>
+      <div class="switch-repertory">
+        <span>仓库列表</span>
+        <ul>
+          <li><div>仓库名称</div><div>仓库地址</div><div>分支</div><div>操作</div></li>
+          <li>
+            <div>vuc</div>
+            <div>https://github.com/DeyaoCai/vuc.git</div>
+            <div>master <span>切换</span></div>
+            <div>
+              <span>选择</span>
+              <span>移出工作空间</span>
+            </div>
+          </li>
+        </ul>
+        <span>已选择</span>
+        <ul>
+          <li>
+            <div>vuc</div>
+            <div>https://github.com/DeyaoCai/vuc.git</div>
+            <div>master <span>切换</span><span>提交</span></div>
+            <div>
+              <span>启用</span>
+              <span>删除已检出文件</span>
+              <span>提交远程</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="switch-foot-btn">
+        <span>检出</span>
+        <span>拉取</span>
+        <span>提交</span>
+        <span>推送</span>
+      </div>
     </div></div>
     <PlatPopup :conf="popConf"><AddForm :conf="popConf"/></PlatPopup>
+
+
+
+
   </div>
 </template>
 <script>
@@ -79,6 +125,26 @@
 </script>
 
 <style scoped>
+  .switch-repertory{
+    padding-top: 10px;
+  }
+  .switch-repertory>span{
+    display: block;
+    line-height: 30px;
+    padding-left: 10px;
+    border-top: 1px solid #f8f8f8;
+    border-bottom: 1px solid #f8f8f8;
+  }
+  .switch-repertory>ul{
+    padding: 5px 10px;
+  }
+  .switch-repertory>ul>li{
+    display: flex;
+  }
+  .switch-repertory>ul>li>div{
+    flex: 1 1 0;
+    padding: 4px 10px;
+  }
   .config-manager-list{
     flex: 1 1 0;
     overflow: hidden;
@@ -122,5 +188,59 @@
     color: #fff;
     padding: 0 20px;
     border-radius: 4px;
+  }
+
+  .switch-work-space{
+    display: flex;
+    justify-content: center;
+    background-color: #5584ff;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  .switch-work-space>span{
+    display: inline-block;
+    padding: 0 20px;
+    line-height: 30px;
+    min-width: 90px;
+    text-align: center;
+    background-color: rgba(255,255,255,1);
+    cursor: pointer;
+    transition: all .3s;
+    transform: scale(.9,.9);
+    border-radius: 4px;
+  }
+  .switch-work-space>span:hover{
+    background-color: rgba(255,255,255,.8);
+  }
+  .switch-work-space>span:active{
+    transform: scale(1,1);
+  }
+
+  .switch-work-space>span.active{
+    background-color: rgba(255,255,255,.3);
+    color: #fff;
+  }
+  .switch-work-space>span:first-child{
+  }
+  .switch-work-space>span:last-child{
+  }
+  .switch-foot-btn{
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid #f8f8f8;
+    padding: 10px;
+  }
+  .switch-foot-btn>span{
+    display: block;
+    padding: 4px 10px;
+    margin:  0 6px;
+    color: rgba(255,255,255,.6);
+    border-radius: 2px;
+    background-color: #5584ff;
+    cursor: pointer;
+    transition: all .3s;
+  }
+  .switch-foot-btn>span:hover{
+    color: rgba(255,255,255,1);
   }
 </style>

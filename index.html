@@ -8,27 +8,7 @@
   <script src="http://localhost:9898/socket.io/socket.io.js"></script>
   <script>
     window.onload = function () {
-      try {
-
-        var Socket = new WebSocket("ws://localhost:9898/socket.io/");
-        Socket.onmessage = function (evt)
-        {
-          // var received_msg = evt.data;
-          console.log("数据已接收...");
-        };
-
-        const socket = io("ws://localhost:9898");
-        console.log(socket);
-        socket.on('refresh', function(msg){
-          console.log(456)
-        });
-      } catch (e) {
-        console.log(e)
-      }
-      try {
-        window.require = require;} catch (e) {
-        console.log(e)
-      }
+      try {window.require = require;} catch (e) {console.log(e);}
     }
   </script>
 </html>
