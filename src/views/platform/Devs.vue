@@ -6,36 +6,39 @@
       <div><span @click="getData">保存</span></div>
     </div>
     <div class="config-manager-list"><div>
-
       <div class="switch-work-space">
-        <span class="active">vuc</span>
-        <span>vucpc</span>
-        <span>ctools</span>
-        <span>platForm</span>
-        <span>tem</span>
+        <span
+          v-for="(space, index) in workSpaces"
+          :index="index"
+          :class="{active: currentWorkSpace && space.name === currentWorkSpace.name}"
+          @click="setCurrentWorkSpace(space)"
+        >{{space.name}}</span>
       </div>
       <div class="switch-repertory">
         <span>仓库列表</span>
         <ul>
-          <li><div>仓库名称</div><div>仓库地址</div><div>分支</div><div>操作</div></li>
           <li>
-            <div>vuc</div>
-            <div>https://github.com/DeyaoCai/vuc.git</div>
-            <div>master <span>切换</span></div>
+            <div>仓库名称</div><div>仓库地址</div><div>分支</div><div>操作</div>
+          </li>
+          <!--unChoseList-->
+          <li v-for="(space, index) in unChoseList" :index="index">
+            <div>{{space.name}}</div>
+            <div>{{space.repertory}}</div>
+            <div>{{space.branch}} <span>切换</span></div>
             <div>
-              <span>选择</span>
+              <span @click="space.disabled = false">启用</span>
               <span>移出工作空间</span>
             </div>
           </li>
         </ul>
         <span>已选择</span>
         <ul>
-          <li>
-            <div>vuc</div>
-            <div>https://github.com/DeyaoCai/vuc.git</div>
-            <div>master <span>切换</span><span>提交</span></div>
+          <li v-for="(space, index) in choseList" :index="index">
+            <div>{{getRepertoryName(space.repertory)}}</div>
+            <div>{{space.repertory}}</div>
+            <div>{{space.branch}} <span>切换</span><span>提交</span></div>
             <div>
-              <span>启用</span>
+              <span @click="space.disabled = true">停用</span>
               <span>删除已检出文件</span>
               <span>提交远程</span>
             </div>
@@ -43,51 +46,91 @@
         </ul>
       </div>
       <div class="switch-foot-btn">
-        <span>检出</span>
-        <span>拉取</span>
+        <span>检出仓库</span>
+        <span>切换分支</span>
+        <span>拉取依赖</span>
+        <span>更新别名</span>
         <span>提交</span>
         <span>推送</span>
       </div>
     </div></div>
     <PlatPopup :conf="popConf"><AddForm :conf="popConf"/></PlatPopup>
-
-
-
-
   </div>
 </template>
 <script>
   import tapeAjax from "../../tapeAjax";
+  import devAjax from "../../devAjax";
   import {parseObjToTree, parseTreeToObj, parseObjectToTreeTools} from "cdy-utils";
   import PlatformTree from "../../units/PlatformTree";
   import PlatPopup from "../../units/PlatPopup";
   import AddForm from "../../units/AddForm";
   const {getAllVal} = parseObjectToTreeTools;
+  // tapeAjax.setCurrentWorkSpace
+
   export default {
     name: 'home',
     components: {PlatformTree, PlatPopup, AddForm},
     data() {
       return {
+        workSpaces: [],
+        currentWorkSpace: null,
         popConf: {
           show: false,
           full: true,
           nowConf: null,
           focusItem: null,
-          onConfirm: type => {
-            const conf = this.popConf.nowConf;
-            const {valType, val} = conf;
-            const key = valType === "array" ? val.length : "";
-            const values =getAllVal();
-            val.push({key, values,  val: values[type], valType: type});
-            this.popConf.hide();
-          },
+          onConfirm: type => {this.popConf.hide();},
         },
         treeData: parseObjToTree(0, {a:456,b: {c:45}}),
       }
     },
     computed: {
+      unChoseList() {
+        const space = this.currentWorkSpace
+        if (space){
+          return space.dto.repertoryList.filter(item => item.disabled)
+        }
+      },
+      choseList() {
+        const space = this.currentWorkSpace
+        if (space){
+          return space.dto.repertoryList.filter(item => !item.disabled)
+        }
+      },
+    },
+    mounted() {
+      devAjax.ctoolsConf().then(res=>{
+        this.treeData = parseObjToTree(0, res.data[0]);
+      });
+      this.getCurrentWorkSpace();
     },
     methods: {
+      log(){
+        console.log.apply(console, arguments);
+      },
+      getRepertoryName(repertory){
+        return repertory.split(/[\\\/]+/).pop().replace(/\.git$/,"");
+      },
+      setCurrentWorkSpace(workspace){
+        devAjax.setCurrentWorkSpace({workspace: workspace.name}).then(res=>{
+          this.currentWorkSpace = workspace;
+        });
+      },
+      getCurrentWorkSpace(){
+        devAjax.getCurrentWorkSpace().then(res=>{
+          const list = res.data.data.list;
+          const currentEntry = res.data.data.currentEntry;
+          list.forEach(space =>
+            space.dto.repertoryList.forEach(item => {
+              item.disabled = !!item.disabled;
+              item.name = this.getRepertoryName(item.repertory);
+            })
+          );
+          this.workSpaces = list;
+          this.currentWorkSpace = list.find(item => item.name === currentEntry);
+        });
+        console.log(this.unChoseList);
+      },
       getData(){
         console.log(
           this.treeData,
@@ -108,16 +151,6 @@
           this.treeData = parseObjToTree(0 , res.data);
         });
       },
-    },
-    mounted() {
-      // this.getDetail();
-      fetch(`http://localhost:9898/dev-tool/ctoolsConf`, {method: 'GET', headers: {
-          "Content-Type": "application/json"
-        }}).then(res=> {
-        res.json().then(res=>{
-          this.treeData = parseObjToTree(0, res.data[0]);
-        })
-      })
     },
     watch: {
     },
