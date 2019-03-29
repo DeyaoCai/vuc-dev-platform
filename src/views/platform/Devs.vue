@@ -24,7 +24,7 @@
           <li v-for="(space, index) in unChoseList" :index="index">
             <div>{{space.name}}</div>
             <div>{{space.repertory}}</div>
-            <div>{{space.branch}} <span>切换</span></div>
+            <div>{{space.branch}} <span></span></div>
             <div>
               <span @click="space.disabled = false">启用</span>
               <span>移出工作空间</span>
@@ -36,7 +36,7 @@
           <li v-for="(space, index) in choseList" :index="index">
             <div>{{getRepertoryName(space.repertory)}}</div>
             <div>{{space.repertory}}</div>
-            <div>{{space.branch}} <span>切换</span><span>提交</span></div>
+            <div>{{space.branch}} <span @click="showChooseBranch(space)">切换</span><span>提交</span></div>
             <div>
               <span @click="space.disabled = true">停用</span>
               <span>删除已检出文件</span>
@@ -54,7 +54,7 @@
         <span>推送</span>
       </div>
     </div></div>
-    <PlatPopup :conf="popConf"><AddForm :conf="popConf"/></PlatPopup>
+    <PlatPopup :conf="popConf"><BranchForm :conf="popConf"/></PlatPopup>
   </div>
 </template>
 <script>
@@ -63,13 +63,13 @@
   import {parseObjToTree, parseTreeToObj, parseObjectToTreeTools} from "cdy-utils";
   import PlatformTree from "../../units/PlatformTree";
   import PlatPopup from "../../units/PlatPopup";
-  import AddForm from "../../units/AddForm";
+  import BranchForm from "../../units/BranchForm";
   const {getAllVal} = parseObjectToTreeTools;
   // tapeAjax.setCurrentWorkSpace
 
   export default {
     name: 'home',
-    components: {PlatformTree, PlatPopup, AddForm},
+    components: {PlatformTree, PlatPopup, BranchForm},
     data() {
       return {
         workSpaces: [],
@@ -77,9 +77,11 @@
         popConf: {
           show: false,
           full: true,
-          nowConf: null,
-          focusItem: null,
-          onConfirm: type => {this.popConf.hide();},
+          space: null,
+          brances: null,
+          onConfirm: branch => {
+            this.checkoutBranch(this.popConf.space, branch);
+          },
         },
         treeData: parseObjToTree(0, {a:456,b: {c:45}}),
       }
@@ -105,6 +107,40 @@
       this.getCurrentWorkSpace();
     },
     methods: {
+      checkoutBranch(space, branch){
+        branch = branch.replace(/^\*/, "").trim();
+        devAjax.checkoutBranch({
+          branch,
+          repertory: space.name,
+          workspace: this.currentWorkSpace.name
+        }).then(res => {
+          this.popConf.hide();
+          console.log(res);
+        });
+      },
+      showChooseBranch(space){
+        devAjax.getAllBranches({
+          repertory: space.name,
+          workspace: this.currentWorkSpace.name
+        }).then(res => {
+          const brances = {
+            local: [],
+            remote: [],
+            default: null,
+            current: null,
+          };
+          res.data.data.branch.forEach(branch => {
+            branch = branch.trim();
+            console.log(branch, /^\*/.test(branch));
+            /^\*/.test(branch) && (brances.current = branch);
+            /^remotes/.test(branch) && (/\/HEAD/.test(branch) ? (brances.default = branch) : brances.remote.push(branch));
+            /^remotes/.test(branch) || (brances.local.push(branch));
+          });
+          this.popConf.space = space;
+          this.popConf.brances = brances;
+          this.popConf.show = true;
+        });
+      },
       log(){
         console.log.apply(console, arguments);
       },

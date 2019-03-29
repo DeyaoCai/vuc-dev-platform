@@ -4,6 +4,9 @@ export default {
   setCurrentWorkSpace: {type: "get", url: "/dev-tool/setCurrentWorkSpace"},
   getCurrentWorkSpace: {type: "get", url: "/dev-tool/getCurrentWorkSpace"},
   ctoolsConf: {type: "get", url: "/dev-tool/ctoolsConf"},
+  getAllBranches: {type: "get", url: "/dev-tool/getAllBranches"},
+  checkoutBranch: {type: "get", url: "/dev-tool/checkoutBranch"},
+
   // getWorkSpaceDetail: {type: "get", url: "/dev-tool/getWorkSpaceDetail"},
 
 }
