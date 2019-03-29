@@ -6,7 +6,9 @@ export default {
   ctoolsConf: {type: "get", url: "/dev-tool/ctoolsConf"},
   getAllBranches: {type: "get", url: "/dev-tool/getAllBranches"},
   checkoutBranch: {type: "get", url: "/dev-tool/checkoutBranch"},
-
+  applySetting: {type: "post", url: "/dev-tool/applySetting"},
+  installDependence: {type: "get", url: "/dev-tool/installDependence"},
+  startServer: {type: "get", url: "/dev-tool/startServer"},
   // getWorkSpaceDetail: {type: "get", url: "/dev-tool/getWorkSpaceDetail"},
 
 }

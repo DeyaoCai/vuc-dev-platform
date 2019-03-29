@@ -18,13 +18,16 @@
         <span>仓库列表</span>
         <ul>
           <li>
-            <div>仓库名称</div><div>仓库地址</div><div>分支</div><div>操作</div>
+            <div>仓库名称</div><div>仓库地址</div><div>预配置/当前 分支</div><div>操作</div>
           </li>
-          <!--unChoseList-->
           <li v-for="(space, index) in unChoseList" :index="index">
             <div>{{space.name}}</div>
             <div>{{space.repertory}}</div>
-            <div>{{space.branch}} <span></span></div>
+            <div v-if="!space.branches"><span>仓库未拉取</span> <span>{{space.branch}}</span></div>
+            <div v-if="space.branches">
+              <span>{{space.branches.default}}</span><span>{{space.branches.current}}</span>
+              <!--<span @click="showChooseBranch(space)">切换</span><span>提交</span>-->
+            </div>
             <div>
               <span @click="space.disabled = false">启用</span>
               <span>移出工作空间</span>
@@ -34,9 +37,13 @@
         <span>已选择</span>
         <ul>
           <li v-for="(space, index) in choseList" :index="index">
-            <div>{{getRepertoryName(space.repertory)}}</div>
+            <div>{{space.name}}</div>
             <div>{{space.repertory}}</div>
-            <div>{{space.branch}} <span @click="showChooseBranch(space)">切换</span><span>提交</span></div>
+            <div v-if="!space.branches">仓库丢失</div>
+            <div v-if="space.branches">
+              <span>{{space.branches.default}}</span> <span>{{space.branches.current}}</span>
+              <span @click="showChooseBranch(space)">切换</span>
+            </div>
             <div>
               <span @click="space.disabled = true">停用</span>
               <span>删除已检出文件</span>
@@ -46,10 +53,9 @@
         </ul>
       </div>
       <div class="switch-foot-btn">
-        <span>检出仓库</span>
-        <span>切换分支</span>
-        <span>拉取依赖</span>
-        <span>更新别名</span>
+        <span @click="applySetting">按当前预配置检出仓库</span>
+        <span @click="installDependence">拉取依赖</span>
+        <span @click="startServer">开启服务</span>
         <span>提交</span>
         <span>推送</span>
       </div>
@@ -107,6 +113,40 @@
       this.getCurrentWorkSpace();
     },
     methods: {
+      applySetting(){
+        const workspace = this.currentWorkSpace;
+        const sentData = JSON.parse(JSON.stringify(workspace));
+        console.log(sentData);
+        sentData.dto.repertoryList.forEach(item => delete item.brances);
+        devAjax.applySetting(sentData).then(res=> {
+          if (res.data.code === 0){
+            const {workSpaces} =this;
+            this.currentWorkSpace = this.initWorkSpaceList(res.data.data)[0];
+            workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
+            alert("apply success!");
+          } else {
+            alert("apply faill!");
+          }
+        })
+      },
+      startServer(){
+        devAjax.startServer({workspace: this.currentWorkSpace.name}).then(res=> {
+          if (res.data.code === 0){
+            alert("server success!");
+          } else {
+            alert("start server faill!");
+          }
+        })
+      },
+      installDependence(){
+        devAjax.installDependence({workspace: this.currentWorkSpace.name}).then(res=> {
+          if (res.data.code === 0){
+            alert("install dependence success!");
+          } else {
+            alert("install dependence faill!");
+          }
+        })
+      },
       checkoutBranch(space, branch){
         branch = branch.replace(/^\*/, "").trim();
         devAjax.checkoutBranch({
@@ -114,32 +154,22 @@
           repertory: space.name,
           workspace: this.currentWorkSpace.name
         }).then(res => {
+          const nextOri = res.data.data[0];
+          const next = `* ${nextOri}`;
+          const local = space.branches.local;
+          local.forEach( (item, index) => {
+            item === nextOri ?
+              local.splice(index, 1, next) :
+              local.splice(index, 1, item.replace(/^\* /, ""))
+          });
+          space.branches.current = next;
           this.popConf.hide();
-          console.log(res);
         });
       },
       showChooseBranch(space){
-        devAjax.getAllBranches({
-          repertory: space.name,
-          workspace: this.currentWorkSpace.name
-        }).then(res => {
-          const brances = {
-            local: [],
-            remote: [],
-            default: null,
-            current: null,
-          };
-          res.data.data.branch.forEach(branch => {
-            branch = branch.trim();
-            console.log(branch, /^\*/.test(branch));
-            /^\*/.test(branch) && (brances.current = branch);
-            /^remotes/.test(branch) && (/\/HEAD/.test(branch) ? (brances.default = branch) : brances.remote.push(branch));
-            /^remotes/.test(branch) || (brances.local.push(branch));
-          });
-          this.popConf.space = space;
-          this.popConf.brances = brances;
-          this.popConf.show = true;
-        });
+        this.popConf.space = space;
+        this.popConf.brances = space.branches;
+        this.popConf.show = true;
       },
       log(){
         console.log.apply(console, arguments);
@@ -147,40 +177,35 @@
       getRepertoryName(repertory){
         return repertory.split(/[\\\/]+/).pop().replace(/\.git$/,"");
       },
+      initWorkSpaceList(list){
+        list.forEach(space =>
+          space.dto.repertoryList.forEach(item => {
+            item.disabled = !!item.disabled;
+            item.name = this.getRepertoryName(item.repertory);
+          })
+        );
+        return list;
+      },
       setCurrentWorkSpace(workspace){
         devAjax.setCurrentWorkSpace({workspace: workspace.name}).then(res=>{
-          this.currentWorkSpace = workspace;
+          const {workSpaces} =this;
+          this.currentWorkSpace = this.initWorkSpaceList(res.data.data)[0];
+          workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
         });
       },
       getCurrentWorkSpace(){
         devAjax.getCurrentWorkSpace().then(res=>{
           const list = res.data.data.list;
           const currentEntry = res.data.data.currentEntry;
-          list.forEach(space =>
-            space.dto.repertoryList.forEach(item => {
-              item.disabled = !!item.disabled;
-              item.name = this.getRepertoryName(item.repertory);
-            })
-          );
-          this.workSpaces = list;
+          this.workSpaces = this.initWorkSpaceList(list);
           this.currentWorkSpace = list.find(item => item.name === currentEntry);
         });
-        console.log(this.unChoseList);
       },
       getData(){
         console.log(
           this.treeData,
           parseTreeToObj(this.treeData)
         );
-        // saveCtoolsConf
-        fetch(`http://localhost:9898/dev-tool/saveCtoolsConf`, {method: 'POST', headers: {
-            "Content-Type": "application/json"
-          }, body: JSON.stringify(parseTreeToObj(this.treeData)[0])}).then(res=> {
-          res.json().then(res=>{
-            console.log(res);
-            // this.treeData = parseObjToTree(0, res.data);
-          })
-        })
       },
       getDetail () {
         tapeAjax.dockerInspect({id: this.$route.query.id}).then(res=> {
@@ -209,10 +234,26 @@
   }
   .switch-repertory>ul>li{
     display: flex;
+    overflow: hidden;
   }
   .switch-repertory>ul>li>div{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     flex: 1 1 0;
     padding: 4px 10px;
+  }
+  .switch-repertory>ul>li>div:nth-child(1){
+    flex: 1 1 0;
+  }
+  .switch-repertory>ul>li>div:nth-child(2){
+    flex: 3 3 0;
+  }
+  .switch-repertory>ul>li>div:nth-child(3){
+    flex: 2 2 0;
+  }
+  .switch-repertory>ul>li>div:nth-child(4){
+    flex: 1.5 1.5 0;
   }
   .config-manager-list{
     flex: 1 1 0;
@@ -290,8 +331,10 @@
     color: #fff;
   }
   .switch-work-space>span:first-child{
+    /*flex: 1 1 0;*/
   }
   .switch-work-space>span:last-child{
+    /*flex: 2 2 0;*/
   }
   .switch-foot-btn{
     display: flex;
