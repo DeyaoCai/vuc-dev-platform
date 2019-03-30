@@ -41,25 +41,25 @@
     methods: {
       isEnc(item){return /^\+/.test(item);},
       isDec(item){return /^-/.test(item);},
-      dropChose(dto){
+      dropChose(dto, isAll){
         const workSpace = this.conf.workSpace().name;
         const sentData = {
           workSpace,
           repertory: dto.repertory,
           name: dto.name.replace(/-- a/, "."),
-          // list: dto.list.map(block => (block.list.filter(line => 1 || line.isActive)))
           list: dto.list.map(block =>
-            block.list.filter(item => /^[\+-]/.test(item.name))
-            // block.list.filter(item => item.isActive)
+            block.list.filter(item => isAll ? /^[\+-]/.test(item.name) : item.isActive)
           )
         };
         devAjax.dropChose(sentData).then(res =>{
           console.log(res);
         })
       },
-      dropBlock(){
-
+      dropBlock(dto){
+        this.dropChose(dto, true)
       },
+
+
       onConfirm() {
         this.conf.onConfirm && this.conf.onConfirm();
       },
