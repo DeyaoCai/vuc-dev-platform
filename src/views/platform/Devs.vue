@@ -88,7 +88,11 @@
           diff: null,
           reset: () => this.getGitDiff(),
           onConfirm: branch => {
-            
+            devAjax.gitCommitAll({
+              workspace: this.currentWorkSpace.name
+            }).then(res => {
+              console.log(res);
+            })
             // this.checkoutBranch(this.popConf.space, branch);
           },
         },
