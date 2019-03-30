@@ -56,11 +56,12 @@
         <span @click="applySetting">按当前预配置检出仓库</span>
         <span @click="installDependence">拉取依赖</span>
         <span @click="startServer">开启服务</span>
-        <span>提交</span>
+        <span @click="getGitDiff">提交</span>
         <span>推送</span>
       </div>
     </div></div>
     <PlatPopup :conf="popConf"><BranchForm :conf="popConf"/></PlatPopup>
+    <PlatPopup :conf="gitDiffConf"><GitDiffForm :conf="gitDiffConf"/></PlatPopup>
   </div>
 </template>
 <script>
@@ -70,16 +71,25 @@
   import PlatformTree from "../../units/PlatformTree";
   import PlatPopup from "../../units/PlatPopup";
   import BranchForm from "../../units/BranchForm";
+  import GitDiffForm from "../../units/GitDiffForm";
   const {getAllVal} = parseObjectToTreeTools;
-  // tapeAjax.setCurrentWorkSpace
 
   export default {
     name: 'home',
-    components: {PlatformTree, PlatPopup, BranchForm},
+    components: {PlatformTree, PlatPopup, BranchForm, GitDiffForm},
     data() {
       return {
         workSpaces: [],
         currentWorkSpace: null,
+        gitDiffConf: {
+          workSpace: () => this.currentWorkSpace,
+          show: false,
+          full: true,
+          diff: null,
+          onConfirm: branch => {
+            this.checkoutBranch(this.popConf.space, branch);
+          },
+        },
         popConf: {
           show: false,
           full: true,
@@ -113,6 +123,14 @@
       this.getCurrentWorkSpace();
     },
     methods: {
+      getGitDiff(){
+        console.log(this.currentWorkSpace);
+        devAjax.getGitDiff({workspace: this.currentWorkSpace.name}).then(res=> {
+          console.log(res);
+          this.gitDiffConf.diff = res.data.data;
+          this.gitDiffConf.show = true;
+        })
+      },
       applySetting(){
         const workspace = this.currentWorkSpace;
         const sentData = JSON.parse(JSON.stringify(workspace));

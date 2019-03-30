@@ -9,6 +9,8 @@ export default {
   applySetting: {type: "post", url: "/dev-tool/applySetting"},
   installDependence: {type: "get", url: "/dev-tool/installDependence"},
   startServer: {type: "get", url: "/dev-tool/startServer"},
+  getGitDiff: {type: "get", url: "/dev-tool/getGitDiff"},
+  dropChose: {type: "post", url: "/dev-tool/dropChose"},
   // getWorkSpaceDetail: {type: "get", url: "/dev-tool/getWorkSpaceDetail"},
 
 }
