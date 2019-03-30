@@ -1,6 +1,4 @@
 export default {
-  dockerImages: {type: "get", url: "/tape/docker/images"},
-  dockerInspect: {type: "get", url: "/tape/docker/image/inspect/:id"},
   setCurrentWorkSpace: {type: "get", url: "/dev-tool/setCurrentWorkSpace"},
   getCurrentWorkSpace: {type: "get", url: "/dev-tool/getCurrentWorkSpace"},
   ctoolsConf: {type: "get", url: "/dev-tool/ctoolsConf"},
@@ -12,4 +10,5 @@ export default {
   getGitDiff: {type: "get", url: "/dev-tool/getGitDiff"},
   dropChose: {type: "post", url: "/dev-tool/dropChose"},
   gitCommitAll: {type: "get", url: "/dev-tool/gitCommitAll"},
+  openDir: {type: "get", url: "/dev-tool/openDir"},
 }
