@@ -90,8 +90,7 @@
           onConfirm: branch => {
             devAjax.gitCommitAll({
               workspace: this.currentWorkSpace.name
-            }).then(res => {
-              console.log(res);
+            }).then(() => {
               this.gitDiffConf.hide();
             })
           },
