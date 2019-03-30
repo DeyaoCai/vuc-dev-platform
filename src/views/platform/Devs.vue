@@ -92,8 +92,8 @@
               workspace: this.currentWorkSpace.name
             }).then(res => {
               console.log(res);
+              this.gitDiffConf.hide();
             })
-            // this.checkoutBranch(this.popConf.space, branch);
           },
         },
         popConf: {
