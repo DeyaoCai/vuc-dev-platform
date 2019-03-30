@@ -12,8 +12,4 @@ export default {
   getGitDiff: {type: "get", url: "/dev-tool/getGitDiff"},
   dropChose: {type: "post", url: "/dev-tool/dropChose"},
   gitCommitAll: {type: "get", url: "/dev-tool/gitCommitAll"},
-  // getWorkSpaceDetail: {type: "get", url: "/dev-tool/getWorkSpaceDetail"},
-
-  //
-
 }
