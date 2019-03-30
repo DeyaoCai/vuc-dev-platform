@@ -86,8 +86,10 @@
           show: false,
           full: true,
           diff: null,
+          reset: () => this.getGitDiff(),
           onConfirm: branch => {
-            this.checkoutBranch(this.popConf.space, branch);
+            
+            // this.checkoutBranch(this.popConf.space, branch);
           },
         },
         popConf: {
@@ -124,9 +126,7 @@
     },
     methods: {
       getGitDiff(){
-        console.log(this.currentWorkSpace);
         devAjax.getGitDiff({workspace: this.currentWorkSpace.name}).then(res=> {
-          console.log(res);
           this.gitDiffConf.diff = res.data.data;
           this.gitDiffConf.show = true;
         })

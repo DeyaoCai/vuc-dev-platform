@@ -52,7 +52,7 @@
           )
         };
         devAjax.dropChose(sentData).then(res =>{
-          console.log(res);
+          this.conf.reset();
         })
       },
       dropBlock(dto){
