@@ -11,6 +11,7 @@ export default {
   startServer: {type: "get", url: "/dev-tool/startServer"},
   getGitDiff: {type: "get", url: "/dev-tool/getGitDiff"},
   dropChose: {type: "post", url: "/dev-tool/dropChose"},
+  test: {type: "post", url: "/dev-tool/dropChose"},
   // getWorkSpaceDetail: {type: "get", url: "/dev-tool/getWorkSpaceDetail"},
 
 }

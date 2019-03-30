@@ -47,7 +47,11 @@
           workSpace,
           repertory: dto.repertory,
           name: dto.name.replace(/-- a/, "."),
-          list: dto.list.map(block => (block.list.filter(line => line.isActive)))
+          // list: dto.list.map(block => (block.list.filter(line => 1 || line.isActive)))
+          list: dto.list.map(block =>
+            block.list.filter(item => /^[\+-]/.test(item.name))
+            // block.list.filter(item => item.isActive)
+          )
         };
         devAjax.dropChose(sentData).then(res =>{
           console.log(res);
@@ -69,7 +73,6 @@
     },
     computed: {
       difference(){
-        console.log(this.conf.diff)
         return this.conf.diff
       }
     },
