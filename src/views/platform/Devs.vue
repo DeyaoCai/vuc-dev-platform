@@ -52,7 +52,7 @@
           </ul>
         </div>
         <div class="switch-foot-btn">
-          <span @click="applySetting">按当前预配置检出仓库</span>
+          <span @click="applySetting" :class="{loading: isApplyingSetting}">按当前预配置检出仓库</span>
           <span @click="getLatestCodes">拉取最新代码</span>
           <span @click="installDependence">拉取依赖</span>
           <!--<span @click="startServer">开启服务</span>-->
@@ -83,6 +83,7 @@
     components: {PlatformTree, PlatPopup, BranchForm, GitDiffForm},
     data() {
       return {
+        isApplyingSetting: false,
         workSpaces: [],
         currentWorkSpace: null,
         gitDiffConf: {
@@ -130,6 +131,16 @@
         this.treeData = parseObjToTree(0, res.data[0]);
       });
       this.getCurrentWorkSpace();
+      socketCallback.applySettingSuccess = res => {
+        const workspace = this.currentWorkSpace;
+        const {workSpaces} = this;
+        this.currentWorkSpace = this.initWorkSpaceList(res)[0];
+        workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
+        this.isApplyingSetting = false;
+      };
+      socketCallback.applySettingFail = res => {
+        this.isApplyingSetting = false;
+      };
     },
     methods: {
       getLatestCodes(){
@@ -147,20 +158,24 @@
         })
       },
       applySetting() {
+        if (this.isApplyingSetting) return;
         const workspace = this.currentWorkSpace;
         const sentData = JSON.parse(JSON.stringify(workspace));
-        console.log(sentData);
         sentData.dto.repertoryList.forEach(item => delete item.brances);
-        devAjax.applySetting(sentData).then(res => {
-          if (res.data.code === 0) {
-            const {workSpaces} = this;
-            this.currentWorkSpace = this.initWorkSpaceList(res.data.data)[0];
-            workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
-            alert("apply success!");
-          } else {
-            alert("apply faill!");
-          }
-        })
+        socket.emit('applySetting', sentData);
+        this.isApplyingSetting = true;
+
+console.log('apply setting')
+        // devAjax.applySetting(sentData).then(res => {
+        //   if (res.data.code === 0) {
+        //     const {workSpaces} = this;
+        //     this.currentWorkSpace = this.initWorkSpaceList(res.data.data)[0];
+        //     workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
+        //     alert("apply success!");
+        //   } else {
+        //     alert("apply faill!");
+        //   }
+        // })
       },
       startServer() {
         devAjax.startServer({workspace: this.currentWorkSpace.name}).then(res => {
@@ -398,9 +413,22 @@
     background-color: #5584ff;
     cursor: pointer;
     transition: all .3s;
-  }
 
+  }
+  .switch-foot-btn > span.loading{
+    animation: loading 1.5s infinite alternate;
+  }
   .switch-foot-btn > span:hover {
     color: rgba(255, 255, 255, 1);
+  }
+  @keyframes loading {
+    0%{
+      color: rgba(255, 255, 255, 1);
+      background-color: #5584ff;
+    }
+    100%{
+      color: #5584ff;
+      background-color: #fff;
+    }
   }
 </style>

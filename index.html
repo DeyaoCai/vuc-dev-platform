@@ -3,12 +3,22 @@
   <head>
     <meta charset="utf-8">
     <title>vue-dev-platform</title>
+    <script src="http://localhost:9898/socket.io/socket.io.js"></script>
+    <script>
+      try {
+        window.socket = io("http://localhost:9898");
+        window.socketCallback = {
+          applySettingSuccess: null,
+          applySettingFail: null,
+        };
+        Object.keys(socketCallback).forEach(item => {
+          socket.on(item, function(){
+            socketCallback[item] && socketCallback[item].apply(socket, arguments)
+          })
+        })
+      } catch (e) {console.log(e);}
+      try {window.require = require;} catch (e) {console.log(e);}
+    </script>
   </head>
   <body><div id="app"></div></body>
-  <script src="http://localhost:9898/socket.io/socket.io.js"></script>
-  <script>
-    window.onload = function () {
-      try {window.require = require;} catch (e) {console.log(e);}
-    }
-  </script>
 </html>
