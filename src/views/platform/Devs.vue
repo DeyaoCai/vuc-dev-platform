@@ -104,6 +104,7 @@
           onConfirm: branch => {
             if (this.isGitCommittingAll) return;
             this.gitDiffConf.hide();
+            this.isGitCommittingAll = true;
             socket.emit('gitCommitAll', {workspace: this.currentWorkSpace.name});
           },
         },
