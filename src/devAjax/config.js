@@ -11,4 +11,5 @@ export default {
   dropChose: {type: "post", url: "/dev-tool/dropChose"},
   gitCommitAll: {type: "get", url: "/dev-tool/gitCommitAll"},
   openDir: {type: "get", url: "/dev-tool/openDir"},
+  getLatestCodes: {type: "get", url: "/dev-tool/getLatestCodes"},
 }

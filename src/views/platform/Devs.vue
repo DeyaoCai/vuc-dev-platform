@@ -53,6 +53,7 @@
         </div>
         <div class="switch-foot-btn">
           <span @click="applySetting">按当前预配置检出仓库</span>
+          <span @click="getLatestCodes">拉取最新代码</span>
           <span @click="installDependence">拉取依赖</span>
           <!--<span @click="startServer">开启服务</span>-->
           <span @click="getGitDiff">提交</span>
@@ -131,6 +132,11 @@
       this.getCurrentWorkSpace();
     },
     methods: {
+      getLatestCodes(){
+        devAjax.getLatestCodes().then(res => {
+          console.log(res);
+        });
+      },
       openDir() {
         devAjax.openDir({workspace: this.currentWorkSpace.name}).then(res => console.log(res));
       },
