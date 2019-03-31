@@ -24,7 +24,9 @@
           gitCommitAllData: null,
         };
         Object.keys(socketCallback).forEach(item => {
+          console.log(item);
           socket.on(item, function(){
+            console.log(item);
             socketCallback[item] && socketCallback[item].apply(socket, arguments)
           })
         })
