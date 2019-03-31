@@ -133,8 +133,9 @@
     },
     methods: {
       getLatestCodes(){
-        devAjax.getLatestCodes().then(res => {
+        devAjax.getLatestCodes({workspace: this.currentWorkSpace.name}).then(res => {
           console.log(res);
+          alert("get latest code succ!");
         });
       },
       openDir() {
