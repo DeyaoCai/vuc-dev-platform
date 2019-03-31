@@ -3,7 +3,7 @@
     <div class="config-manager-title">
       <span>工作空间</span>
       <b>随意切换：个人项目 | 公司项目 / pc | 移动端</b>
-      <div><span @click="getData">保存</span></div>
+      <div><span @click="">保存</span></div>
     </div>
     <div class="config-manager-list">
       <div>
@@ -53,13 +53,18 @@
         </div>
         <div class="switch-foot-btn">
           <span @click="applySetting" :class="{loading: isApplyingSetting}">按当前预配置检出仓库</span>
-          <span @click="getLatestCodes">拉取最新代码</span>
-          <span @click="installDependence">拉取依赖</span>
+          <span @click="getLatestCodes" :class="{loading: isGettingLatestCodes}">拉取最新代码</span>
+          <span @click="installDependence" :class="{loading: isInstallingDependence}">拉取依赖</span>
           <!--<span @click="startServer">开启服务</span>-->
           <span @click="getGitDiff">提交</span>
           <span @click="openDir">打开工作空间目录</span>
         </div>
       </div>
+    </div>
+    <div class="logs">
+      <ul>
+        <li v-for="item in serveMsg">{{item}}</li>
+      </ul>
     </div>
     <PlatPopup :conf="popConf">
       <BranchForm :conf="popConf"/>
@@ -83,7 +88,11 @@
     components: {PlatformTree, PlatPopup, BranchForm, GitDiffForm},
     data() {
       return {
+        serveMsg: [],
+        isGitCommittingAll: false,
+        isGettingLatestCodes: false,
         isApplyingSetting: false,
+        isInstallingDependence: false,
         workSpaces: [],
         currentWorkSpace: null,
         gitDiffConf: {
@@ -93,11 +102,14 @@
           diff: null,
           reset: () => this.getGitDiff(),
           onConfirm: branch => {
-            devAjax.gitCommitAll({
-              workspace: this.currentWorkSpace.name
-            }).then(() => {
-              this.gitDiffConf.hide();
-            })
+            if (this.isGitCommittingAll) return;
+            this.gitDiffConf.hide();
+            socket.emit('gitCommitAll', {workspace: this.currentWorkSpace.name});
+            // devAjax.gitCommitAll({
+            //   workspace: this.currentWorkSpace.name
+            // }).then(() => {
+            //   this.gitDiffConf.hide();
+            // })
           },
         },
         popConf: {
@@ -114,16 +126,12 @@
     },
     computed: {
       unChoseList() {
-        const space = this.currentWorkSpace
-        if (space) {
-          return space.dto.repertoryList.filter(item => item.disabled)
-        }
+        const space = this.currentWorkSpace;
+        if (space) return space.dto.repertoryList.filter(item => item.disabled);
       },
       choseList() {
-        const space = this.currentWorkSpace
-        if (space) {
-          return space.dto.repertoryList.filter(item => !item.disabled)
-        }
+        const space = this.currentWorkSpace;
+        if (space) return space.dto.repertoryList.filter(item => !item.disabled);
       },
     },
     mounted() {
@@ -137,21 +145,46 @@
         this.currentWorkSpace = this.initWorkSpaceList(res)[0];
         workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
         this.isApplyingSetting = false;
+        this.serveMsg.push("应用配置成功！");
       };
-      socketCallback.applySettingFail = res => {
-        this.isApplyingSetting = false;
+      socketCallback.applySettingFail = () => this.isApplyingSetting = false;
+      socketCallback.applySettingData = res => this.serveMsg.push(res);
+
+      socketCallback.getLatestCodesSuccess = () => {
+        this.serveMsg.push("获取最新代码成功！");
+        this.isGettingLatestCodes = false;
       };
+      socketCallback.getLatestCodesFail = () => this.isGettingLatestCodes = false;
+      socketCallback.getLatestCodesData = res => this.serveMsg.push(res);
+
+      socketCallback.installDependenceSuccess = () => {
+        this.serveMsg.push("安装依赖成功！");
+        this.isInstallingDependence = false;
+      };
+      socketCallback.installDependenceFail = () => this.isInstallingDependence = false;
+      socketCallback.installDependenceData = res => this.serveMsg.push(res);
+
+      socketCallback.gitCommitAllSuccess = () => {
+        this.serveMsg.push("提交代码成功！");
+        this.isGitCommittingAll = false;
+      };
+      socketCallback.gitCommitAllFail = () => this.isGitCommittingAll = false;
+      socketCallback.gitCommitAllData = res => this.serveMsg.push(res);
     },
     methods: {
       getLatestCodes(){
-        devAjax.getLatestCodes({workspace: this.currentWorkSpace.name}).then(res => {
-          alert("get latest code succ!");
-        });
+        if (this.isGettingLatestCodes) return;
+        const workspace = this.currentWorkSpace;
+        const sentData = JSON.parse(JSON.stringify(workspace));
+        sentData.dto.repertoryList.forEach(item => delete item.brances);
+        socket.emit('getLatestCodes', sentData);
+        this.isGettingLatestCodes = true;
       },
       openDir() {
         devAjax.openDir({workspace: this.currentWorkSpace.name}).then(res => console.log(res));
       },
       getGitDiff() {
+        if (this.isGitCommittingAll) return;
         devAjax.getGitDiff({workspace: this.currentWorkSpace.name}).then(res => {
           this.gitDiffConf.diff = res.data.data;
           this.gitDiffConf.show = true;
@@ -164,18 +197,6 @@
         sentData.dto.repertoryList.forEach(item => delete item.brances);
         socket.emit('applySetting', sentData);
         this.isApplyingSetting = true;
-
-console.log('apply setting')
-        // devAjax.applySetting(sentData).then(res => {
-        //   if (res.data.code === 0) {
-        //     const {workSpaces} = this;
-        //     this.currentWorkSpace = this.initWorkSpaceList(res.data.data)[0];
-        //     workSpaces.splice(workSpaces.indexOf(workspace), 1, this.currentWorkSpace);
-        //     alert("apply success!");
-        //   } else {
-        //     alert("apply faill!");
-        //   }
-        // })
       },
       startServer() {
         devAjax.startServer({workspace: this.currentWorkSpace.name}).then(res => {
@@ -187,13 +208,9 @@ console.log('apply setting')
         })
       },
       installDependence() {
-        devAjax.installDependence({workspace: this.currentWorkSpace.name}).then(res => {
-          if (res.data.code === 0) {
-            alert("install dependence success!");
-          } else {
-            alert("install dependence faill!");
-          }
-        })
+        if (this.isInstallingDependence) return;
+        socket.emit('installDependence', {workspace: this.currentWorkSpace.name});
+        this.isInstallingDependence = true;
       },
       checkoutBranch(space, branch) {
         branch = branch.replace(/^\*/, "").trim();
@@ -239,17 +256,6 @@ console.log('apply setting')
           const currentEntry = res.data.data.currentEntry;
           this.workSpaces = this.initWorkSpaceList(list);
           this.currentWorkSpace = list.find(item => item.name === currentEntry);
-        });
-      },
-      getData() {
-        console.log(
-          this.treeData,
-          parseTreeToObj(this.treeData)
-        );
-      },
-      getDetail() {
-        tapeAjax.dockerInspect({id: this.$route.query.id}).then(res => {
-          this.treeData = parseObjToTree(0, res.data);
         });
       },
     },
@@ -430,5 +436,20 @@ console.log('apply setting')
       color: #5584ff;
       background-color: #fff;
     }
+  }
+  .logs{
+    width: 100%;
+    height: 100px;
+    overflow: hidden;
+    background-color: #fff;
+    position: relative;
+  }
+  .logs>ul{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  .logs>ul>li{
+    padding: 4px 10px;
   }
 </style>

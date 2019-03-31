@@ -10,6 +10,18 @@
         window.socketCallback = {
           applySettingSuccess: null,
           applySettingFail: null,
+          applySettingData: null,
+
+          getLatestCodesSuccess: null,
+          getLatestCodesFail: null,
+          getLatestCodesData: null,
+
+          installDependenceSuccess: null,
+          installDependenceFail: null,
+          installDependenceData: null,
+
+          gitCommitAllSuccess: null,
+          gitCommitAllData: null,
         };
         Object.keys(socketCallback).forEach(item => {
           socket.on(item, function(){
