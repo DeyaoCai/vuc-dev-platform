@@ -56,7 +56,7 @@
           <span @click="getLatestCodes" :class="{loading: isGettingLatestCodes}">拉取最新代码</span>
           <span @click="installDependence" :class="{loading: isInstallingDependence}">拉取依赖</span>
           <!--<span @click="startServer">开启服务</span>-->
-          <span @click="getGitDiff">提交</span>
+          <span @click="getGitDiff" :class="{loading: isGitCommittingAll}">提交</span>
           <span @click="openDir">打开工作空间目录</span>
         </div>
       </div>
@@ -105,11 +105,6 @@
             if (this.isGitCommittingAll) return;
             this.gitDiffConf.hide();
             socket.emit('gitCommitAll', {workspace: this.currentWorkSpace.name});
-            // devAjax.gitCommitAll({
-            //   workspace: this.currentWorkSpace.name
-            // }).then(() => {
-            //   this.gitDiffConf.hide();
-            // })
           },
         },
         popConf: {
